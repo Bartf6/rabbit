@@ -6,22 +6,27 @@ async function start() {
     const app = express();
     const port = 3000;
 
-    const connection = await amqp.connect(process.env.MESSAGE_QUEUE);
-    const channel = await connection.createChannel();
-    await channel.assertQueue('messages', {durable:true});
-
+    const sendconnection = await amqp.connect(process.env.MESSAGE_QUEUE);
+    const sendchannel = await sendconnection.createChannel();
+    const receiveconnection = await amqp.connect(process.env.MESSAGE_QUEUE);
+    const receivechannel = await receiveconnection.createChannel();
+    await receivechannel.assertQueue('respond', {durable:true});
+    await receivechannel.consume('respond', response => {
+        console.log(response.content.toString());
+        receivechannel.ack(response);
+    })
 
     app.get('/', (req, res) => {
         const message = req.query.text;
         const queue = "respond";
         
-        channel.sendToQueue('logs', Buffer.from(message), {
+        sendchannel.sendToQueue('logs', Buffer.from(message), {
             contentType: 'application/json',
             persistent: true,
             replyTo: queue
         });
 
-        console.log('sent message to rabbitmq');
+        console.log('sent message to sub api');
         res.json({ success: true});
     })
 

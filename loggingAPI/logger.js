@@ -10,8 +10,8 @@ async function start() {
     channel.consume('logs', message => {
         console.log('received a message from rabbitmq');
         console.log(message.content.toString());
-        fs.appendFile('/data/messages.txt', message.content.toString() + '\n',
-        err => channel.ack(message));
+        // fs.appendFile('/data/messages.txt', message.content.toString() + '\n',
+        // err => channel.ack(message));
         console.log(message.properties.replyTo);
     });
 }
