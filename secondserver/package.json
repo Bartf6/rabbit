@@ -1,0 +1,13 @@
+{
+    "name": "secondserver",
+    "version": "1.0.0",
+    "main": "secondserver.js",
+    "scripts": {
+        "start": "node secondserver.js"
+    },
+    "dependencies": {
+        "amqplib": "^0.8.0",
+        "cluster": "^0.7.7",
+        "express": "^4.17.3"
+    }
+}

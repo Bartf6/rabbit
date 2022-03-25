@@ -1,0 +1,11 @@
+{
+    "name": "logger",
+    "version": "1.0.0",
+    "main": "logger.js",
+    "scripts": {
+        "start": "node logger.js"
+    },
+    "dependencies": {
+        "amqplib": "^0.8.0"
+    }
+}

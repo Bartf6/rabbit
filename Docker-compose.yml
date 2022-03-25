@@ -1,0 +1,37 @@
+version: '3.9'
+services:
+  messagebus:
+    image: rabbitmq:latest
+  logging:
+    build: ./loggingAPI
+    environment:
+      - MESSAGE_QUEUE=amqp://messagebus
+    volumes:
+      - ./data:/data
+    deploy:
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - messagebus
+  web:
+    build: ./Server
+    ports:
+      - 3000:3000
+    environment:
+      - MESSAGE_QUEUE=amqp://messagebus
+    deploy:
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - messagebus
+  secondweb:
+    build: ./secondserver
+    ports:
+      - 3001:3001
+    environment:
+      - MESSAGE_QUEUE=amqp://messagebus
+    deploy:
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - messagebus
