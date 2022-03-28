@@ -9,11 +9,14 @@ const mongoose = require('mongoose');
 const apiRoutes = require('./api-routes');
 const bodyParser = require('body-parser');
 const environment = require('./config/environment');
-
+const Userlog = require('./models/userlog.models');
+var data;
 
  async function start() 
  {
-    const sendconnection = await amqp.connect(process.env.MESSAGE_QUEUE);
+    
+  
+  const sendconnection = await amqp.connect(process.env.MESSAGE_QUEUE);
     const sendchannel = await sendconnection.createChannel();
     const receiveconnection = await amqp.connect(process.env.MESSAGE_QUEUE);
     const receivechannel = await receiveconnection.createChannel();
@@ -22,6 +25,17 @@ const environment = require('./config/environment');
         console.log(message.content.toString());
         receivechannel.ack(message);
         responseChannel = message.properties.replyTo;
+        
+        data = Userlog.find({username:message.content.toString()});
+        data.map(d => d.username).sort();
+        console.log(data);
+
+        sendchannel.sendToQueue(responseChannel, Buffer.from('test'), {
+          contentType: 'application/json',
+          persistent: true,
+        });
+
+        console.log('Send reply back to main API');
     });
     
     app.use(cors());
