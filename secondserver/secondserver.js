@@ -1,9 +1,15 @@
+require('dotenv').config();
 const express = require('express');
 const amqp = require('amqplib');
 const { default: cluster } = require('cluster');
 const app = express();
+const cors = require('cors');
 const port = 3001;
-var responseChannel = "respond";
+const mongoose = require('mongoose');
+const apiRoutes = require('./api-routes');
+const bodyParser = require('body-parser');
+const environment = require('./config/environment');
+
 
  async function start() 
  {
@@ -18,6 +24,50 @@ var responseChannel = "respond";
         responseChannel = message.properties.replyTo;
     });
     
+    app.use(cors());
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
+    
+    console.log('connection string', environment.mongodb.uri);
+    console.log('secret', environment.secret);
+    mongoose.connect(environment.mongodb.uri, {
+        useUnifiedTopology: true,
+        useNewUrlParser: true,
+      });
+    mongoose.Promise = global.Promise;
+    
+    mongoose.connection.on('error', (error) => {
+        console.log('Database error: ', error);
+      });
+      
+      // On successful connection
+      mongoose.connection.on('connected', () => {
+        console.log('Connected to database');
+      });
+    
+      const allowedExt = [
+        '.js',
+        '.ico',
+        '.css',
+        '.png',
+        '.jpg',
+        '.woff2',
+        '.woff',
+        '.ttf',
+        '.svg',
+        '.webmanifest',
+      ];
+      
+    app.use('/api', apiRoutes);
+    
+    const HOST = '0.0.0.0';
+    const server = app.listen(process.env.EXPRESS_PORT || 3001, HOST, () => {
+        const PORT = server.address().port;
+        console.log(`Running  on http://${HOST}:${PORT}`);
+      });
+
+    var responseChannel = "respond";
+
     app.get('/receive', (req, res) => {
         const response = req.query.text;
 
@@ -28,10 +78,6 @@ var responseChannel = "respond";
         console.log('Sent message to main api');
         res.json({succes: true});
     })
-    
-    app.listen(port, () => {
-        console.log(`Listening at http://localhost:${port}`)
-    });
 }
 
 start();

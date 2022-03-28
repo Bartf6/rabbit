@@ -1,13 +1,13 @@
 version: '3.9'
 services:
-    mongo:
+  mongo:
     image: mongo:latest
     environment:
-       - MONGO_INITDB_DATABASE=Connections 
-       - MONGO_INITDB_ROOT_USERNAME=root
-       - MONGO_INITDB_ROOT_PASSWORD=rootPassXXX
+      - MONGO_INITDB_DATABASE=Test 
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=rootPassXXX
     ports: 
-    - 27017:27017
+      - 27017:27017
     volumes:
       - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
       - ./data:/data/db
@@ -42,16 +42,17 @@ services:
     links:
       - mongo
     environment:
-      - MESSAGE_QUEUE=amqp://messagebus
+      - PORT=3001
       - DB_USERNAME=root
       - DB_PASSWORD=rootPassXXX
       - HOSTNAME=mongo
       - DB_PORT=27017
       - DB_NAME=Test
       - DB_PARAMS=?authSource=admin
+      - MESSAGE_QUEUE=amqp://messagebus
     deploy:
       restart_policy:
         condition: on-failure
     depends_on:
-      - messagebus
       - mongo
+      - messagebus
