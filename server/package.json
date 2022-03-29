@@ -8,7 +8,12 @@
     "dependencies": {
         "amqplib": "^0.8.0",
         "cluster": "^0.7.7",
+        "cors": "^2.8.5",
+        "body-parser": "^1.19.0",
+        "dotenv": "^16.0.0",
+        "env": "^0.0.2",
         "express": "^4.17.3",
-        "env": "^0.0.2"
+        "mongoose": "^5.11.11",
+        "mongodb-memory-server": "^6.9.2"
     }
 }

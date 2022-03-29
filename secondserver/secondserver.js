@@ -10,12 +10,9 @@ const apiRoutes = require('./api-routes');
 const bodyParser = require('body-parser');
 const environment = require('./config/environment');
 const Userlog = require('./models/userlog.models');
-var data;
 
  async function start() 
  {
-    
-  
   const sendconnection = await amqp.connect(process.env.MESSAGE_QUEUE);
     const sendchannel = await sendconnection.createChannel();
     const receiveconnection = await amqp.connect(process.env.MESSAGE_QUEUE);
@@ -26,16 +23,26 @@ var data;
         receivechannel.ack(message);
         responseChannel = message.properties.replyTo;
         
-        data = Userlog.find({username:message.content.toString()});
-        data.map(d => d.username).sort();
-        console.log(data);
+        var receivedString = message.content.toString();
 
-        sendchannel.sendToQueue(responseChannel, Buffer.from('test'), {
-          contentType: 'application/json',
-          persistent: true,
+        data = Userlog.find({}, (error, data) => {
+          if (error) {
+            console.log(error);
+          }
+          else {
+            console.log(data);
+            var testdata = JSON.stringify(data);
+            
+            sendchannel.sendToQueue(responseChannel, Buffer.from(testdata), {
+              contentType: 'application/json',
+              persistent: true,
+            });
+    
+            console.log('Send reply back to main API');
+          }
         });
 
-        console.log('Send reply back to main API');
+        
     });
     
     app.use(cors());
@@ -85,7 +92,7 @@ var data;
     app.get('/receive', (req, res) => {
         const response = req.query.text;
 
-        sendchannel.sendToQueue(responseChannel, Buffer.from(response), {
+        sendchannel.sendToQueue(responseChannel, Buffer.from(JSON.stringify(response)), {
             contentType: 'application/json',
             persistent: true
         })

@@ -1,9 +1,9 @@
-const Userlog = require('../models/userlog.models');
+const Message = require('../models/message.model');
 
 const environment = require('../config/environment');
 
 exports.index = (req, res) => {
-    Userlog.get((err, users) => {
+    Message.get((err, messages) => {
         if (err) {
             res.status(400).json({
                 status: 'error',
@@ -13,31 +13,30 @@ exports.index = (req, res) => {
             res.json({
                 status: 'succes',
                 message: 'Users retrieved succesfully',
-                data: users,
+                data: messages,
             });
         }
     });
 };
 
 exports.new = (req, res) => {
-    Userlog.find({username: req.body.username.trim()}, (err, userlogs) => {
+    Message.find({message: req.body.message.trim()}, (err, messages) => {
         if (err) {
             res.status(400).send({
                 status: 'error',
                 message: err,
             });
-        } else if (userlogs && userlogs.length > 0) {
+        } else if (messages && messages.length > 0) {
             res.status(400).send({
                 status: 'error',
-                message: '${req.body.username} is already taken',
+                message: '${req.body.message} already exists'
             });
-        } else {
-            
-            const userlog = new Userlog();
-            userlog.username = req.body.username;
-            userlog.logstatus = req.body.logstatus;
+        } else
+        {
+            const message = new Message();
+            message.messagecontent = req.body.messagecontent
 
-            userlog.save((saveErr) => {
+            message.save((saveErr) => {
                 if (saveErr) {
                     res.status(400).json({
                         status: 'error',
@@ -45,10 +44,10 @@ exports.new = (req, res) => {
                     });
                 }
                 res.json({
-                    message: 'new user created!',
-                    data: userlog,
+                    message: 'message received!',
+                    data: message,
                 });
             });
         }
     });
-};
+}
