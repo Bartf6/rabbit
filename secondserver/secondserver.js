@@ -13,7 +13,7 @@ const Userlog = require('./models/userlog.models');
 
  async function start() 
  {
-  const sendconnection = await amqp.connect(process.env.MESSAGE_QUEUE);
+    const sendconnection = await amqp.connect(process.env.MESSAGE_QUEUE);
     const sendchannel = await sendconnection.createChannel();
     const receiveconnection = await amqp.connect(process.env.MESSAGE_QUEUE);
     const receivechannel = await receiveconnection.createChannel();
@@ -40,9 +40,7 @@ const Userlog = require('./models/userlog.models');
     
             console.log('Send reply back to main API');
           }
-        });
-
-        
+        });        
     });
     
     app.use(cors());

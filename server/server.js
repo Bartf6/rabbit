@@ -2,14 +2,13 @@ const express = require('express');
 const amqp = require('amqplib');
 const { default: cluster } = require('cluster');
 const cors = require('cors');
+const app = express();
 const mongoose = require('mongoose');
 const apiRoutes = require('./api-routes');
 const bodyParser = require('body-parser');
 const environment = require('./config/environment');
 
 async function start() {
-    const app = express();
-
     const sendconnection = await amqp.connect(process.env.MESSAGE_QUEUE);
     const sendchannel = await sendconnection.createChannel();
     const receiveconnection = await amqp.connect(process.env.MESSAGE_QUEUE);
@@ -18,7 +17,7 @@ async function start() {
     await receivechannel.consume('respond', response => {
         console.log(response.content.toString());
         receivechannel.ack(response);
-    });
+  });
 
         
     app.use(cors());
